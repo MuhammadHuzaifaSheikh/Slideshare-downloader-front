@@ -1,6 +1,7 @@
 
 let input = document.querySelector('input');
 let button = document.querySelector('.button')
+const baseUrl = 'https://slideshare-article-downloader.herokuapp.com';
  let pdfBtn =      button.firstElementChild;
 pdfBtn.innerHTML="PDF";
 let pptBtn = pdfBtn.nextElementSibling;
@@ -29,7 +30,7 @@ function getHtml() {
         }
     };
 
-    fetch("http://localhost:5000/sendLink", requestOptions)
+    fetch(baseUrl+"/sendLink", requestOptions)
         .then(response => response.text())
         .then(result => {
             let htmlString = result;
