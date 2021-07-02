@@ -1,50 +1,49 @@
-
 let input = document.querySelector('input');
 let button = document.querySelector('.button')
-const baseUrl = 'https://slideshare-article-downloader.herokuapp.com';
- let pdfBtn =      button.firstElementChild;
-pdfBtn.innerHTML="PDF";
+const baseUrl = 'http://localhost:5000';
+let pdfBtn = button.firstElementChild;
+pdfBtn.innerHTML = "PDF";
 let pptBtn = pdfBtn.nextElementSibling;
-pptBtn.innerHTML= 'PPT';
+pptBtn.innerHTML = 'PPT';
 
 let images = [];
+
 function getHtml() {
-    pdfBtn.innerHTML= `
+    pdfBtn.innerHTML = `
      <div class="spinner-border text-success" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
     `
-    pptBtn.innerHTML= `
+    pptBtn.innerHTML = `
      <div class="spinner-border text-success" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
     `
 
-    images= []
+    images = []
     var requestOptions = {
         method: 'POST',
-        body: JSON.stringify({siteUrl:input.value}),
+        body: JSON.stringify({siteUrl: input.value}),
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
     };
 
-    fetch(baseUrl+"/sendLink", requestOptions)
+    fetch(baseUrl + "/sendLink", requestOptions)
         .then(response => response.text())
         .then(result => {
             let htmlString = result;
             let htmlEle = new DOMParser().parseFromString(htmlString, "text/html");
-            let slide_container =  htmlEle.body.querySelectorAll('.slide_container>section>img')
-          if (slide_container.length>0){
-              getAllSlides(slide_container)
-          }
-          else {
-              alert('Cannot download the file');
-              pptBtn.innerHTML= 'PPT';
-              pdfBtn.innerHTML= 'PDF';
+            let slide_container = htmlEle.body.querySelectorAll('.slide_container>section>img')
+            if (slide_container.length > 0) {
+                getAllSlides(slide_container)
+            } else {
+                alert('Cannot download the file');
+                pptBtn.innerHTML = 'PPT';
+                pdfBtn.innerHTML = 'PDF';
 
-          }
+            }
         })
         .catch(error => console.log('error', error));
 
@@ -52,28 +51,47 @@ function getHtml() {
 
 
 function getAllSlides(slide_container) {
-    slide_container.forEach((image)=>{
-        images.push(image.src)
+    slide_container.forEach((image) => {
+        images.push(image.src + '.jpeg')
     })
-    PdfGenerator(images)
-    pptBtn.innerHTML= 'PPT';
-    pdfBtn.innerHTML= 'PDF';
-}
-
-
-function PdfGenerator(images) {
-    printJS({
-        printable: images,
-        type: 'image',
-        showModal: true, // Optional
-        modalMessage: 'Printing Images...', // Optional
-        style: ['@page { size: A4; margin: 0mm;} body {margin-top: 0;}  img { width:100%}'],
-        targetStyles: ['*']
-    }
-    );
+    console.log(images);
+    getBase64Staring(images)
 
 }
 
 
 
+function getBase64Staring(images) {
+    fetch(baseUrl + '/makeBase64String', {
+        method: "POST",
+        body: JSON.stringify({images}),
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    }).then((data) => {
+        data.json().then((response) => {
+            console.log(response);
+            pdfGenerator(response.result)
+        })
+    }).catch((err) => {
+        console.log(err);
+    })
 
+
+}
+
+
+function pdfGenerator(images) {
+    pdfBtn.innerHTML = `PDF`;
+    pptBtn.innerHTML = `PPT`;
+
+    var doc = new jsPDF('landscape')
+    images.forEach((base64Strings)=>{
+        doc.addImage(base64Strings, 'JPEG', 0, 0, 300, 220)
+        doc.addPage('a4', 'landscape')
+    })
+
+    doc.save()
+
+}
