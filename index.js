@@ -111,11 +111,6 @@ function pptGenerator(images) {
 // 2. Add a Slide
     images.forEach((url)=>{
         let slide = pres.addSlide();
-        // slide.addImage({ data:url,  sizing: {
-        //         type:'cover',
-        //         h: 1.5 ,
-        //         w:3,
-        //     } });
         slide.background = {data:url};
 
     })
