@@ -56,7 +56,6 @@ function getHtml(format) {
 function getAllSlides(slide_container,format) {
     slide_container.forEach((image) => {
         images.push(image.getAttribute('data-full') + '.jpeg')
-        console.log(image);
     })
     if (format==='pdf'){
         getBase64Staring(images,format)
@@ -78,7 +77,6 @@ function getBase64Staring(images,format) {
     }).then((data) => {
         data.json().then((response) => {
             console.log(response);
-            pdfGenerator(response.result)
             if (format==='pdf'){
                 pdfGenerator(response.result)
             }
@@ -103,9 +101,10 @@ function pdfGenerator(images) {
     })
    doc.deletePage(images.length+1)
 
-    console.log(doc);
+
 
     doc.save(`${input.value.replace('https://www.slideshare.net/','')}.pdf`)
+
 
 }
 
